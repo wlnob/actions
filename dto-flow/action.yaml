@@ -50,6 +50,7 @@ runs:
         git config --global user.email "<>"
         git config --global user.name "Release Plugin"
         echo "Build started on $(date)"
+      shell: bash
     # Configure Git
     - name: Build DTO
       env:
@@ -57,3 +58,4 @@ runs:
       run: |
         echo "Building the DTO jar"
         mvn clean install release:prepare release:perform release:clean "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
+      shell: bash
