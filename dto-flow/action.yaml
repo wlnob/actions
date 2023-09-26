@@ -1,6 +1,10 @@
 name: 'Boemm DTO Build Action'
 description: 'Builds the DTO jar using Maven Release Plugin'
 inputs:
+  github-token:
+    description: "rw gh token for release-plugin. be carefull with permissions"
+    required: true
+    default: none
   java-version:
     description: 'Override java version. ex: 11'
     required: false
@@ -21,7 +25,7 @@ runs:
       uses: actions/checkout@v2
       if: "!contains(github.event.head_commit.message, '[maven-release-plugin]')"
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}   
+        token: ${{ inputs.github-token }}   
 
     - name: Set up JDK 11
       uses: actions/setup-java@v3
@@ -43,13 +47,13 @@ runs:
     # Configure Git
     - name: Set up Git
       run: |
-        git config --global user.email "release@boemm.eu"
+        git config --global user.email "<>"
         git config --global user.name "Release Plugin"
         echo "Build started on $(date)"
     # Configure Git
     - name: Build DTO
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         echo "Building the DTO jar"
         mvn clean install release:prepare release:perform release:clean "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
