@@ -9,7 +9,8 @@ inputs:
     description: 'override maven args. ex: -Darguments="-Dmaven.javadoc.skip=true"'
     required: false
     default: none
-  maven-profile: 'set maven profile, if needed. ex: -Pgithub-actions'
+  maven-profile: 
+    description: 'set maven profile, if needed. ex: -Pgithub-actions'
     required: false
     default: "-Pgithub-actions"
 
