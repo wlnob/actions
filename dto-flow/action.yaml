@@ -16,7 +16,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-   steps:
     - name: Checkout code
       uses: actions/checkout@v2
       if: "!contains(github.event.head_commit.message, '[maven-release-plugin]')"
