@@ -1,5 +1,5 @@
-name: 'Boemm DTO Build Action'
-description: 'Builds the DTO jar using Maven Release Plugin'
+name: 'Boemm Service Build Action'
+description: 'Builds the Service jar using Maven Release Plugin'
 inputs:
   github-token:
     description: "rw gh token for release-plugin. be carefull with permissions"
@@ -35,15 +35,6 @@ runs:
         cache: 'maven'
         server-id: github
 
-    # Cache Maven dependencies
-    - name: Cache Maven packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-m2
-
     - name: Restore cache
       id: cache-restore
       uses: actions/cache/restore@v3
@@ -64,7 +55,7 @@ runs:
           GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         echo "Building the Service jar"
-        mvn -q -B -Darguments='-Dmaven.javadoc.skip=true' release:perform release:clean "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
+        mvn -B -Darguments='-Dmaven.javadoc.skip=true' clean initialize release:prepare "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
       shell: bash
 
     - name: Save Cache
