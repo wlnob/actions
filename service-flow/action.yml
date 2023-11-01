@@ -63,8 +63,8 @@ runs:
       env:
           GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
-        echo "Building the DTO jar"
-        mvn -q mvn -B -Darguments='-Dmaven.javadoc.skip=true' release:perform release:clean "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
+        echo "Building the Service jar"
+        mvn -q -B -Darguments='-Dmaven.javadoc.skip=true' release:perform release:clean "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
       shell: bash
 
     - name: Save Cache
