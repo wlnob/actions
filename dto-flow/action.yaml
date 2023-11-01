@@ -27,7 +27,7 @@ runs:
       with:
         token: ${{ inputs.github-token }}   
 
-    - name: Set up JDK 11
+    - name: Set up JDK
       uses: actions/setup-java@v3
       with:
         distribution: 'corretto'
@@ -43,6 +43,13 @@ runs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-m2
+
+    - name: Restore cache
+      id: cache-restore
+      uses: actions/cache/restore@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           
     # Configure Git
     - name: Set up Git
@@ -59,3 +66,10 @@ runs:
         echo "Building the DTO jar"
         mvn clean install release:prepare release:perform release:clean "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
       shell: bash
+
+    - name: Save Cache
+      id: cache-save
+      uses: actions/cache/save@v3
+      with:
+        path: ~/.m2
+        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
