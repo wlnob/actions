@@ -20,7 +20,7 @@ runs:
     - run: |
         pwd
         ls -lah
-        aws cloudformation package --template-file ${{ github.event.inputs.sam_template }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file cloudformation_template.yaml
+        aws cloudformation package --template-file ${{ inputs.sam_template }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file cloudformation_template.yaml
         aws s3 cp cloudformation_template.yaml s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/cloudformation_template.yaml
       shell: bash
 
