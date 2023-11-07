@@ -35,6 +35,15 @@ runs:
         cache: 'maven'
         server-id: github
 
+    # Cache Maven dependencies
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-m2
+
     - name: Restore cache
       id: cache-restore
       uses: actions/cache/restore@v3
@@ -57,10 +66,3 @@ runs:
         echo "Building the Service jar"
         mvn -B -Darguments='-Dmaven.javadoc.skip=true' clean initialize release:prepare "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
       shell: bash
-
-    - name: Save Cache
-      id: cache-save
-      uses: actions/cache/save@v3
-      with:
-        path: ~/.m2
-        key: ${{ steps.cache-restore.outputs.cache-primary-key }}

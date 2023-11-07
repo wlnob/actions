@@ -1,0 +1,32 @@
+# .GitHub/actions/cloudformation-package-upload/action.yml
+name: 'CloudFormation Package and Upload'
+description: 'Packages a CloudFormation template and uploads it to S3'
+inputs:
+  s3_bucket_prefix:
+    description: 'S3 Bucket Prefix'
+    required: true
+  s3_key_prefix:
+    description: 'S3 Key Prefix'
+    required: true
+  s3_bucket:
+    description: 'S3 Bucket Name'
+    required: true
+  app_name:
+    description: 'Application Name'
+    required: true
+  commit:
+    description: 'Commit SHA'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        aws cloudformation package --region ${{ env.AWS_REGION }} --template-file ${{ github.event.inputs.sam_template }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file cloudformation_template.yaml
+        aws s3 cp cloudformation_template.yaml s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/cloudformation_template.yaml
+      shell: bash
+
+    - run: |
+        for paramFile in cfn/${{ env.AwsApplicationName }}-dynamic-*.json; do
+          aws s3 cp $paramFile s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/$(basename $paramFile)
+        done
+      shell: bash
