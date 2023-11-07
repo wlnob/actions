@@ -28,7 +28,7 @@ runs:
         for file in cfn/${{ inputs.app_name }}-*.json; do
           if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
             echo "Processing $file"
-            aws s3 cp $file s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/$(basename $paramFile)
+            aws s3 cp $file s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/$(basename $file)
           fi
         done
       shell: bash
