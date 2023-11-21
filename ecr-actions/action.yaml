@@ -26,20 +26,15 @@ runs:
 
     - name: build docker
       id: image-build
-      env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: ${{ inputs.registry_path }}
-        IMAGE_TAGS: ${{ inputs.tag }}"
-        RELEASE_TAG: ${{ inputs.release_tag }}
       shell: bash
       run: |
-        image="${ REPOSITORY }"
-        imageUri="${ REGISTRY }/${ image }"
-        IFS=',' read -ra TAGS <<< "${ IMAGE_TAGS }"
+        image="${{ inputs.registry_path }}"
+        imageUri="${{ steps.login-ecr.outputs.registry }}/${ image }"
+        IFS=',' read -ra TAGS <<< "${{ inputs.tags }}""
         for tag in "${TAGS[@]}"; do
-          docker tag ${image}:${RELEASE_TAG} ${imageUri}:${tag:0:7}
+          docker tag ${image}:${{ inputs.release_tag }} ${imageUri}:${tag:0:7}
         done
         if [[ "${{ inputs.github_ref_name }}" == "master" ]]; then
-          docker tag ${image}:${RELEASE_TAG} ${imageUri}:latest    
+          docker tag ${image}:${{ inputs.release_tag }} ${imageUri}:latest    
         fi
         docker push --all-tags ${imageUri}
