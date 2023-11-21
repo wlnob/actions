@@ -98,10 +98,11 @@ runs:
         echo "performing release for scm=${{steps.properties.outputs.tag}}"
         mvn -B -Darguments='-Dmaven.javadoc.skip=true' clean initialize release:prepare -Pgithub-actions
 
-    - name: Get MVN release tag
-      id: get-tag
+    - name: Get Tags
       run: |
         echo "releasePluginCommit=$(git rev-list -n 1 ${{ steps.properties.outputs.tag }} | xargs)" >> $GITHUB_OUTPUT
+        echo "tag=${{steps.properties.outputs.tag}}" >> $GITHUB_OUTPUT
+        echo "rel=${{steps.properties.outputs.rel}}" >> $GITHUB_OUTPUT
       shell: bash
       if: steps.perform-release.outcome == 'success'
 
