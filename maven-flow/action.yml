@@ -17,6 +17,16 @@ inputs:
     description: 'set maven profile, if needed. ex: -Pgithub-actions'
     required: false
     default: "-Pgithub-actions"
+outputs:
+  releasePluginCommit:
+    description: Release plugin commit
+    value: ${{ steps.getReleaseCommit.outputs.releasePluginCommit }}
+  tag:
+    description: Release plugin tag
+    value: ${{steps.properties.outputs.tag}}"
+  rel:
+    description: Release plugin rel
+    value: ${{steps.properties.outputs.rel}}"
 
 runs:
   using: "composite"
@@ -99,9 +109,9 @@ runs:
         mvn -B -Darguments='-Dmaven.javadoc.skip=true' clean initialize release:prepare -Pgithub-actions
 
 
-    - run: |
+    - name: Get Maven Release plugin
+      id: getReleaseCommit
+      run: |
         echo "releasePluginCommit=$(git rev-list -n 1 ${{ steps.properties.outputs.tag }} | xargs)" >> $GITHUB_OUTPUT
-        echo "tag=${{steps.properties.outputs.tag}}" >> $GITHUB_OUTPUT
-        echo "rel=${{steps.properties.outputs.rel}}" >> $GITHUB_OUTPUT
       shell: bash
       if: steps.perform-release.outcome == 'success'
