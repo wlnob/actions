@@ -11,12 +11,26 @@ inputs:
   sam_template:
     description: 'SAM template file'
     required: true
+  tag:
+    description: 'Release plugin tag/commit, used as discriminator in S3 bucket'
+    required: true
   app_name:
     description: 'app name'
     required: true
 runs:
   using: "composite"
   steps:
+
+    - name: Bake the tag into the CloudFormation Dynamic Stack template
+      shell: bash
+      run: |
+        for file in cfn/${{ inputs.app_name }}-dynamic-parameters-*.json; do
+        if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
+          echo "Baking release commit ImageTag '${{ inputs.tag }}' into $file"
+          jq --arg commit_id ${{ inputs.tag }} 'map(if .ParameterKey == "ImageTag" then .ParameterValue = $commit_id else . end)' "$file" > cfn/temp.json && mv cfn/temp.json "$file"
+        fi
+        done
+
     - run: |
         pwd
         ls -lah
