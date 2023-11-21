@@ -27,7 +27,7 @@ runs:
       run: |
         image="${{ inputs.repository }}"
         imageUri="${{ steps.login-ecr.outputs.registry }}/${image}"
-        IFS=',' read -ra TAGS <<< "${{ inputs.tags }}""
+        IFS=',' read -ra TAGS <<< "${{ inputs.tags }}"
         for tag in "${TAGS[@]}"; do
           echo "Pushing to ${imageUri}:${tag:0:7}"
           docker tag ${image}:${{ inputs.release_tag }} ${imageUri}:${tag:0:7}
