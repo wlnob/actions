@@ -1,0 +1,45 @@
+name: 'ECR TAG AND Publish'
+description: 'Publish Docker images to ECR'
+inputs:
+  registry:
+    description: 'ECR registry URL'
+    required: true
+  repository:
+    description: 'Repository name'
+    required: true
+  release_tag:
+    description: 'Release tag'
+    required: true
+  tags:
+    description: 'Comma-separated list of tags'
+    required: true
+  github_ref_name:
+    description: 'GitHub reference name'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: ECR LOGIN
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: build docker
+      id: image-build
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: ${{ inputs.registry_path }}
+        IMAGE_TAGS: ${{ inputs.tag }}"
+        RELEASE_TAG: ${{ inputs.release_tag }}
+      shell: bash
+      run: |
+        image="${ REPOSITORY }"
+        imageUri="${ REGISTRY }/${ image }"
+        IFS=',' read -ra TAGS <<< "${ IMAGE_TAGS }"
+        for tag in "${TAGS[@]}"; do
+          docker tag ${image}:${RELEASE_TAG} ${imageUri}:${tag:0:7}
+        done
+        if [[ "${{ inputs.github_ref_name }}" == "master" ]]; then
+          docker tag ${image}:${RELEASE_TAG} ${imageUri}:latest    
+        fi
+        docker push --all-tags ${imageUri}
