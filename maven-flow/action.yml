@@ -23,10 +23,10 @@ outputs:
     value: ${{ steps.getReleaseCommit.outputs.releasePluginCommit }}
   tag:
     description: Release plugin tag
-    value: ${{steps.properties.outputs.tag}}"
+    value: ${{steps.properties.outputs.tag}}
   rel:
     description: Release plugin rel
-    value: ${{steps.properties.outputs.rel}}"
+    value: ${{steps.properties.outputs.rel}}
 
 runs:
   using: "composite"
