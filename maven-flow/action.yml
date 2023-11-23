@@ -56,16 +56,9 @@ runs:
       uses: actions/cache@v2
       with:
         path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-m2-${{ github.event.repository.name }}-${{ github.ref_name }}
         restore-keys: |
           ${{ runner.os }}-m2
-
-    - name: Restore cache
-      id: cache-restore
-      uses: actions/cache/restore@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
     # Configure Git
     - name: Set up Git
       run: |
