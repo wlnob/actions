@@ -1,8 +1,8 @@
 name: 'Deploy CloudFormation Stack'
 description: 'Deploys a CloudFormation stack'
 inputs:
-  core_account:
-    description: 'Core AWS account ID'
+  storage_account:
+    description: 'CFN Storage AWS account ID'
     required: true
   aws_account:
     description: 'AWS account ID for deployment'
@@ -27,7 +27,7 @@ runs:
     - name: Configure AWS credentials CFN (download cfns)
       uses: aws-actions/configure-aws-credentials@v3
       with:
-        role-to-assume: arn:aws:iam::${{ inputs.core_account }}:role/Github_Actions_Role
+        role-to-assume: arn:aws:iam::${{ inputs.storage_account }}:role/Github_Actions_Role
         aws-region: ${{ inputs.aws_region }}
 
     - run: |
