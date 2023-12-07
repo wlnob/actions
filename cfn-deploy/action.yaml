@@ -1,0 +1,52 @@
+name: 'Deploy CloudFormation Stack'
+description: 'Deploys a CloudFormation stack'
+inputs:
+  core_account:
+    description: 'Core AWS account ID'
+    required: true
+  aws_account:
+    description: 'AWS account ID for deployment'
+    required: true
+  repository_name:
+    description: 'GitHub repository name'
+    required: true
+  rel_tag:
+    description: 'Release tag'
+    required: true
+  env:
+    description: 'Environment'
+    required: true
+  aws_region:
+    description: 'AWS region for deployment'
+    required: false
+    default: 'eu-central-1'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Configure AWS credentials CFN (download cfns)
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.core_account }}:role/Github_Actions_Role
+        aws-region: ${{ inputs.aws_region }}
+
+    - run: |
+        aws s3 cp s3://cfn-lambdas-${{ inputs.aws_region }}/${{ inputs.repository_name }}/${{ inputs.rel_tag }}/ . --recursive
+      shell: bash
+
+    - name: Configure AWS credentials CFN deploy
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/Github_Actions_Role
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Deploy Cloudformation Stack
+      uses: aws-actions/aws-cloudformation-github-deploy@v1
+      with:
+        name: "${{ inputs.repository_name }}-dynamic"
+        capabilities: CAPABILITY_NAMED_IAM
+        template: cloudformation_template.yaml
+        no-fail-on-empty-changeset: "1"
+        parameter-overrides: |
+          file:///${{ github.workspace }}/${{ inputs.repository_name }}-dynamic-parameters-${{ inputs.env }}.json
+        timeout-in-minutes: 20
