@@ -26,8 +26,7 @@ inputs:
     default: 'CAPABILITY_NAMED_IAM'
   name:
     description: 'Stack name'
-    required: false
-    default: ${{ inputs.repository_name }}
+    required: true
 runs:
   using: "composite"
   steps:
