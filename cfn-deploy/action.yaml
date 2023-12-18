@@ -20,7 +20,10 @@ inputs:
     description: 'AWS region for deployment'
     required: false
     default: 'eu-central-1'
-
+  capabilities:
+    description: 'Capabilities'
+    required: false
+    default: 'CAPABILITY_NAMED_IAM'
 runs:
   using: "composite"
   steps:
@@ -44,7 +47,7 @@ runs:
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
         name: "${{ inputs.repository_name }}-dynamic"
-        capabilities: CAPABILITY_NAMED_IAM
+        capabilities: ${{ inputs.capabilities }}
         template: cloudformation_template.yaml
         no-fail-on-empty-changeset: "1"
         parameter-overrides: |
