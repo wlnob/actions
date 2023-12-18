@@ -24,6 +24,10 @@ inputs:
     description: 'Capabilities'
     required: false
     default: 'CAPABILITY_NAMED_IAM'
+  name:
+    description: 'Stack name'
+    required: false
+    default: ${{ inputs.repository_name }}
 runs:
   using: "composite"
   steps:
@@ -46,7 +50,7 @@ runs:
     - name: Deploy Cloudformation Stack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
-        name: "${{ inputs.repository_name }}-dynamic"
+        name: ${{ inputs.name }}
         capabilities: ${{ inputs.capabilities }}
         template: cloudformation_template.yaml
         no-fail-on-empty-changeset: "1"
