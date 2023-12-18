@@ -58,7 +58,7 @@ runs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ github.event.repository.name }}-${{ github.ref_name }}
         restore-keys: |
-          ${{ runner.os }}-m2
+          ${{ runner.os }}-m2-${{ github.event.repository.name }}-${{ github.ref_name }}
     # Configure Git
     - name: Set up Git
       run: |
