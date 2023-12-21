@@ -5,11 +5,16 @@ inputs:
     description: 'Name of the Python function file'
     required: true
     default: 'lambda_function.py'
+  working_dir:
+    description: 'Working directory'
+    required: false
+    default: '.'
 
 runs:
   using: "composite"
   steps:
     - run: |
+        cd ${{ inputs.working_dir }}
         pip3 install -r requirements.txt --target ./lambda
         cd ./lambda
         ls -lah
