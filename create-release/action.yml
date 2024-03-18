@@ -1,0 +1,28 @@
+name: 'GH CLI create release'
+description: 'Creates a Github release for maven release plugins'
+inputs:
+  tagName:
+    description: "Name of tag"
+    required: true
+  github-token:
+    description: "GH token for CLI ops"
+    required: true
+  include-pr:
+    description: "Include pull request messages"
+    required: false
+    default: 'false' # Set default to false
+runs:
+  using: "composite"
+  steps:
+    - name: Release-Prepare
+      id: release-prepare
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        echo "Building the Service jar"
+        PR_OPTION=""
+        if [[ ${{ inputs.include-pr }} == 'true' ]]; then
+          PR_OPTION="--generate-notes"
+        fi
+        gh release create ${{ inputs.tagName }} --title "${{ inputs.tagName }}" --notes "Maven release ${{ inputs.tagName }}" $PR_OPTION --prerelease
+      shell: bash
