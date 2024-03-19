@@ -1,0 +1,46 @@
+name: Update GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tagName:
+        description: 'Tag of the release to update'
+        required: true
+        type: string
+      environment:
+        description: 'Environment to which the code was deployed'
+        required: true
+        type: string
+      github-token:
+        description: 'GitHub token for CLI operations'
+        required: true
+        type: string
+
+jobs:
+  update-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Release Notes and Status
+        env:
+          GITHUB_TOKEN: ${{ inputs.github-token }}
+        run: |
+          TAG_NAME=${{ github.event.inputs.tagName }}
+          ENVIRONMENT=${{ github.event.inputs.environment }}
+          # Fetch the current release notes
+          CURRENT_NOTES=$(gh release view $TAG_NAME --json body -q .body)
+          # Prepare the new release notes content
+          NEW_NOTES="${CURRENT_NOTES}"
+          # Check if the current notes already contain the environment information
+          if [[ "$CURRENT_NOTES" != *"$ENVIRONMENT"* ]]; then
+            NEW_NOTES="${CURRENT_NOTES}\n\nDeployed to ${ENVIRONMENT}"
+          fi
+          # Check the environment and update the release accordingly
+          if [ "$ENVIRONMENT" == "QA" ]; then
+            # If deployed to QA, update the release notes and mark the release as not a pre-release
+            gh release edit $TAG_NAME --notes "$NEW_NOTES" --draft=false
+          elif [[ "$CURRENT_NOTES" != *"$ENVIRONMENT"* ]]; then
+            # If environment is not QA and the environment info is new, just update the release notes
+            gh release edit $TAG_NAME --notes "$NEW_NOTES" --prerelease
+          else
+            echo "The release notes already mention the environment ${ENVIRONMENT}, and no status changes are required."
+          fi
