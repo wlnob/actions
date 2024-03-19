@@ -30,22 +30,24 @@ runs:
         CURRENT_NOTES=$(gh release view "$TAG_NAME" --json body -q .body)
         # Prepare the new release notes content
         if [[ "$CURRENT_NOTES" != *"$ENVIRONMENT"* ]]; then
-          NEW_NOTES="${CURRENT_NOTES}
-          Deployed to ${ENVIRONMENT}"
+        NEW_NOTES="${CURRENT_NOTES}
+        Deployed to ${ENVIRONMENT}"
         else
-          NEW_NOTES="${CURRENT_NOTES}"
+        NEW_NOTES="${CURRENT_NOTES}"
         fi
         # Check the environment and update the release accordingly
         if [ "$ENVIRONMENT" == "qa" ]; then
-          # If deployed to QA, update the release notes and remove the pre-release status
-          gh release edit "$TAG_NAME" --notes "$NEW_NOTES" --prerelease=false
+        # If deployed to QA, update the release notes and remove the pre-release status
+        gh release edit "$TAG_NAME" --notes "$NEW_NOTES" --prerelease=false
+        #  gh release edit "$TAG_NAME" --discussion-category "Releases"
         elif [ "$ENVIRONMENT" == "prod" ]; then
-          # If deployed to prod, update the release notes, remove pre-release status
-          gh release edit "$TAG_NAME" --notes "$NEW_NOTES" --draft=false
+        # If deployed to prod, update the release notes, remove pre-release status, and set as the latest release
+        gh release edit "$TAG_NAME" --notes "$NEW_NOTES" --draft=false --latest
         else
-          # If environment is not QA or prod and the environment info is new, just update the release notes and keep it as pre-release
-          if [[ "$NEW_NOTES" != "$CURRENT_NOTES" ]]; then
-            gh release edit "$TAG_NAME" --notes "$NEW_NOTES" --prerelease
-          else
-            echo "The release notes already mention the environment ${ENVIRONMENT}, and no status changes are required."
+        # If environment is not QA or prod and the environment info is new, just update the release notes and keep it as pre-release
+        if [[ "$NEW_NOTES" != "$CURRENT_NOTES" ]]; then
+        gh release edit "$TAG_NAME" --notes "$NEW_NOTES" --prerelease
+        else
+        echo "The release notes already mention the environment ${ENVIRONMENT}, and no status changes are required."
+        fi
         fi
