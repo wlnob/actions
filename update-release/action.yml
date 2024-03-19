@@ -7,7 +7,7 @@ inputs:
   environment:
     description: 'Environment to which the code was deployed'
     required: true
-  githubToken:
+  github-token:
     description: 'GitHub token for CLI operations'
     required: true
 
@@ -17,7 +17,7 @@ runs:
     - name: Update Release Notes and Status
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.githubToken }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         TAG_NAME=${{ inputs.tagName }}
         ENVIRONMENT=${{ inputs.environment }}
