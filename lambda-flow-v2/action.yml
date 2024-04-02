@@ -22,10 +22,10 @@ runs:
         zip_names=${{ inputs.zip_names }}
         
         IFS=',' read -r -a function_array <<< "$function_names"
-        IFS=',' read -f -a zip_array <<< "$zip_names"
+        IFS=',' read -r -a zip_array <<< "$zip_names"
         
-        if [ ${#function_names[@]} -ne ${#zip_names[@]} ]; then
-          echo "The size of the function_names and zip_names are not equal
+        if [ ${#function_array[@]} -ne ${#zip_array[@]} ]; then
+          echo "The size of the function_names and zip_names are not equal"
           exit 1
         fi
         
