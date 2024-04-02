@@ -1,0 +1,45 @@
+name: 'Python Lambda Packer'
+description: 'Packs a Python Lambda function zip'
+inputs:
+  function_names:
+    description: 'Name of the Python function file'
+    required: true
+    default: 'lambda_function.py'
+  zip_names:
+    description: 'Name of the zip archive'
+    required: true
+    default: 'function.zip'
+  working_dir:
+    description: 'Working directory'
+    required: false
+    default: '.'
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        function_names=${{ inputs.function_names }}
+        zip_names=${{ inputs.zip_names }}
+        
+        IFS=',' read -r -a function_array <<< "$function_names"
+        IFS=',' read -f -a zip_array <<< "$zip_names"
+        
+        if [ ${#function_names[@]} -ne ${#zip_names[@]} ]; then
+          echo "The size of the function_names and zip_names are not equal
+          exit 1
+        fi
+        
+        cd ${{ inputs.working_dir }}
+        pip3 install -r requirements.txt --target ./lambda
+        cd ./lambda
+        ls -lah
+        
+        for index in ${!function_array[@]}; do
+            zip -r9 ../${zip_array[index]}.zip .
+            cd ../
+            echo $(pwd)
+            ls -lah
+            zip -g ${zip_array[index]}.zip ${function_array[index]}
+            cd ./lambda
+        done
+      shell: bash
