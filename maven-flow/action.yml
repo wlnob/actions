@@ -73,7 +73,7 @@ runs:
           GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         echo "Building the Service jar"
-        mvn -q -B -Darguments='-Dmaven.javadoc.skip=true' clean initialize release:prepare "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
+        mvn -B -Darguments='-Dmaven.javadoc.skip=true' clean initialize release:prepare "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
       shell: bash
       # Get Properties for Docker artifact process
     - name: Read Properties
