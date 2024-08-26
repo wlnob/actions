@@ -2,7 +2,7 @@ name: 'Python Lambda Packer'
 description: 'Packs a Python Lambda function zip'
 inputs:
   function_name:
-    description: 'Name of the Python function file'
+    description: 'Space separated names of the Python function files'
     required: true
     default: 'lambda_function.py'
   working_dir:
@@ -22,5 +22,9 @@ runs:
         cd ../
         echo $(pwd)
         ls -lah
-        zip -g function.zip ${{ inputs.function_name }}
+        array=(${{ inputs.function_name }})
+        for lambda_file in "${array[@]}"; do
+          echo $element
+          zip -g function.zip $lambda_file
+        done
       shell: bash
