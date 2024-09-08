@@ -5,6 +5,10 @@ inputs:
     description: 'Space separated names of the Python function files'
     required: true
     default: 'lambda_function.py'
+  zip_name:
+    description: 'name of zip archive'
+    required: true
+    default: "function"
   working_dir:
     description: 'Working directory'
     required: false
@@ -18,13 +22,13 @@ runs:
         pip3 install -r requirements.txt --target ./lambda
         cd ./lambda
         ls -lah
-        zip -r9 ../function.zip .
+        zip -r9 ../${{ inputs.zip_name }}.zip .
         cd ../
         echo $(pwd)
         ls -lah
         array=(${{ inputs.function_name }})
         for lambda_file in "${array[@]}"; do
           echo $element
-          zip -g function.zip $lambda_file
+          zip -g ${{ inputs.zip_name }}.zip $lambda_file
         done
       shell: bash
