@@ -5,6 +5,10 @@ inputs:
     description: "rw gh token for release-plugin. be carefull with permissions"
     required: true
     default: none
+  java-distro:
+    description: 'distribution of java'
+    requried: true
+    default: 'corretto'
   java-version:
     description: 'Override java version. ex: 11'
     required: false
@@ -46,7 +50,7 @@ runs:
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        distribution: 'corretto'
+        distribution: "${{ inputs.java-distro }}"
         java-version: "${{ inputs.java-version }}"
         cache: 'maven'
         server-id: github
