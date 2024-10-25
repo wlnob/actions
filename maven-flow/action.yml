@@ -103,7 +103,7 @@ runs:
       shell: bash
       run: |
         echo "performing release for scm=${{steps.properties.outputs.tag}}"
-        mvn -B -Darguments='-Dmaven.javadoc.skip=true' clean initialize release:perform -Pgithub-actions
+        mvn -B -Darguments='-Dmaven.javadoc.skip=true' release:perform "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
 
 
     - name: Get Maven Release plugin
