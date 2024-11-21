@@ -39,7 +39,9 @@ runs:
             cd ../
             echo $(pwd)
             ls -lah
-            zip -g ${zip_array[index]}.zip common.py
+            if [ -f common.py ]; then
+              zip -g ${zip_array[index]}.zip common.py
+            fi
             zip -g ${zip_array[index]}.zip ${function_array[index]}
             cd ./lambda
         done
