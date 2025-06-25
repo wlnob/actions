@@ -20,14 +20,17 @@ inputs:
   cf_template:
     description: 'CF template filename'
     default: 'cloudformation_template.yaml'    
+  parameters_type:
+    description: 'Type of parameters'
+    default: 'dynamic-parameters'    
 runs:
   using: "composite"
   steps:
 
-    - name: Bake the tag into the CloudFormation Dynamic Stack template
+    - name: Bake the tag into the CloudFormation Universal Stack template
       shell: bash
       run: |
-        for file in cfn/${{ inputs.app_name }}-dynamic-parameters-*.json; do
+        for file in cfn/${{ inputs.app_name }}-${{ inputs.parameters_type }-*.json; do
         if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
           echo "Baking release commit ImageTag '${{ inputs.tag }}' into $file"
           jq --arg commit_id ${{ inputs.tag }} 'map(if .ParameterKey == "ImageTag" then .ParameterValue = $commit_id else . end)' "$file" > cfn/temp.json && mv cfn/temp.json "$file"
@@ -42,7 +45,7 @@ runs:
       shell: bash
 
     - run: |
-        for file in cfn/${{ inputs.app_name }}-dynamic-parameters-*.json; do
+        for file in cfn/${{ inputs.app_name }}-${{ inputs.parameters_type }-*.json; do
           if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
             echo "Processing $file"
             aws s3 cp $file s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/$(basename $file)
