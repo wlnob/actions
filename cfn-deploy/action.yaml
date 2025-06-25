@@ -29,9 +29,11 @@ inputs:
     required: true
   cf_template:
     description: 'CF template filename'
+    required: false
     default: 'cloudformation_template.yaml'
   parameters_type:
     description: 'Type of parameters'
+    required: false
     default: 'dynamic-parameters'
 runs:
   using: "composite"
