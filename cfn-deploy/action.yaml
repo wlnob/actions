@@ -62,5 +62,5 @@ runs:
         template: ${{ inputs.cf_template }}
         no-fail-on-empty-changeset: "1"
         parameter-overrides: |
-          file:///${{ github.workspace }}/${{ inputs.repository_name }}-${{ inputs.parameters_type }-${{ inputs.env }}.json
+          file:///${{ github.workspace }}/${{ inputs.repository_name }}-${{ inputs.parameters_type }}-${{ inputs.env }}.json
         timeout-in-minutes: 20
