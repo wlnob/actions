@@ -32,7 +32,7 @@ runs:
     - name: Bake the tag into the CloudFormation Universal Stack template
       shell: bash
       run: |
-        for file in cfn/${{ inputs.app_name }}-${{ inputs.parameters_type }-*.json; do
+        for file in cfn/${{ inputs.app_name }}-${{ inputs.parameters_type }}-*.json; do
         if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
           echo "Baking release commit ImageTag '${{ inputs.tag }}' into $file"
           jq --arg commit_id ${{ inputs.tag }} 'map(if .ParameterKey == "ImageTag" then .ParameterValue = $commit_id else . end)' "$file" > cfn/temp.json && mv cfn/temp.json "$file"
