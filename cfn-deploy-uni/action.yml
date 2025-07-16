@@ -24,21 +24,12 @@ inputs:
     description: 'Capabilities'
     required: false
     default: 'CAPABILITY_NAMED_IAM'
-  name:
+  app_name:
     description: 'Stack name'
     required: true
-  cf_template:
+  cfn_template_basename:
     description: 'CF template filename'
-    required: false
-    default: 'cloudformation_template.yaml'
-  parameters_type:
-    description: 'Type of parameters'
-    required: false
-    default: 'dynamic-parameters'
-  path:
-    description: 'Catalog path to data'
-    required: false
-    default: ''    
+    required: true
 runs:
   using: "composite"
   steps:
@@ -49,7 +40,7 @@ runs:
         aws-region: ${{ inputs.aws_region }}
 
     - run: |
-        aws s3 cp s3://cfn-uni-${{ inputs.aws_region }}/${{ inputs.repository_name }}/${{ inputs.rel_tag }}/${{ inputs.name }} . --recursive
+        aws s3 cp s3://cfn-uni-${{ inputs.aws_region }}/${{ inputs.repository_name }}/${{ inputs.rel_tag }}/${{ inputs.app_name }}/ . --recursive
       shell: bash
 
     - name: Configure AWS credentials CFN deploy
@@ -61,10 +52,10 @@ runs:
     - name: Deploy Cloudformation Stack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
-        name: ${{ inputs.name }}
+        name: ${{ inputs.app_name }}
         capabilities: ${{ inputs.capabilities }}
-        template: ${{ inputs.cf_template }}
+        template: ${{ inputs.cfn_template_basename }}
         no-fail-on-empty-changeset: "1"
         parameter-overrides: |
-          file:///${{ github.workspace }}/${{ inputs.repository_name }}-${{ inputs.parameters_type }}-${{ inputs.env }}.json
+          file:///${{ github.workspace }}/${{ inputs.app_name }}-${{ inputs.env }}.json
         timeout-in-minutes: 20
