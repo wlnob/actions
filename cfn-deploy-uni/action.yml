@@ -49,6 +49,12 @@ runs:
         role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/Github_Actions_Role
         aws-region: ${{ inputs.aws_region }}
 
+    - name: parse tags
+      id: parse_tags
+      run: |
+        TAGS_JSON=$(jq -c . ${{ inputs.app_name}}-tags-${{ inputs.env }}.json)
+        echo "tags=$TAGS_JSON" >> $GITHUB_OUTPUT
+
     - name: Deploy Cloudformation Stack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
@@ -58,4 +64,6 @@ runs:
         no-fail-on-empty-changeset: "1"
         parameter-overrides: |
           file:///${{ github.workspace }}/${{ inputs.app_name }}-${{ inputs.env }}.json
+        tags: ${{ steps.parse_tags.outputs.tags }}
         timeout-in-minutes: 20
+      if: steps.parse_tags.outcome =='success'
