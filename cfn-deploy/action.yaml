@@ -27,18 +27,6 @@ inputs:
   name:
     description: 'Stack name'
     required: true
-  cf_template:
-    description: 'CF template filename'
-    required: false
-    default: 'cloudformation_template.yaml'
-  parameters_type:
-    description: 'Type of parameters'
-    required: false
-    default: 'dynamic-parameters'
-  path:
-    description: 'Catalog path to data'
-    required: false
-    default: ''    
 runs:
   using: "composite"
   steps:
@@ -63,8 +51,8 @@ runs:
       with:
         name: ${{ inputs.name }}
         capabilities: ${{ inputs.capabilities }}
-        template: ${{ inputs.cf_template }}
+        template: cloudformation_template.yaml
         no-fail-on-empty-changeset: "1"
         parameter-overrides: |
-          file:///${{ github.workspace }}/${{ inputs.repository_name }}-${{ inputs.parameters_type }}-${{ inputs.env }}.json
+          file:///${{ github.workspace }}/${{ inputs.repository_name }}-dynamic-parameters-${{ inputs.env }}.json
         timeout-in-minutes: 20

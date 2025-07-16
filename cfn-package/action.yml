@@ -17,26 +17,14 @@ inputs:
   app_name:
     description: 'app name'
     required: true
-  cf_template:
-    description: 'CF template filename'
-    required: false
-    default: 'cloudformation_template.yaml'
-  parameters_type:
-    description: 'Type of parameters'
-    required: false
-    default: 'dynamic-parameters'
-  path:
-    description: 'Catalog path to data'
-    required: false
-    default: ''
 runs:
   using: "composite"
   steps:
 
-    - name: Bake the tag into the CloudFormation Universal Stack template
+    - name: Bake the tag into the CloudFormation Dynamic Stack template
       shell: bash
       run: |
-        for file in cfn/${{ inputs.path }}/${{ inputs.app_name }}-${{ inputs.parameters_type }}-*.json; do
+        for file in cfn/${{ inputs.app_name }}-dynamic-parameters-*.json; do
         if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
           echo "Baking release commit ImageTag '${{ inputs.tag }}' into $file"
           jq --arg commit_id ${{ inputs.tag }} 'map(if .ParameterKey == "ImageTag" then .ParameterValue = $commit_id else . end)' "$file" > cfn/temp.json && mv cfn/temp.json "$file"
@@ -46,12 +34,12 @@ runs:
     - run: |
         pwd
         ls -lah
-        aws cloudformation package --template-file ${{ inputs.sam_template }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file ${{ inputs.cf_template }}
-        aws s3 cp ${{ inputs.cf_template }} s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.cf_template }}
+        aws cloudformation package --template-file ${{ inputs.sam_template }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file cloudformation_template.yaml
+        aws s3 cp cloudformation_template.yaml s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/cloudformation_template.yaml
       shell: bash
 
     - run: |
-        for file in cfn/${{ inputs.path }}/${{ inputs.app_name }}-${{ inputs.parameters_type }}-*.json; do
+        for file in cfn/${{ inputs.app_name }}-dynamic-parameters-*.json; do
           if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
             echo "Processing $file"
             aws s3 cp $file s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/$(basename $file)
