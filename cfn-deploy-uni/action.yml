@@ -54,6 +54,7 @@ runs:
       run: |
         TAGS_JSON=$(jq -c . ${{ inputs.app_name}}-stack-tags-${{ inputs.env }}.json)
         echo "tags=$TAGS_JSON" >> $GITHUB_OUTPUT
+      shell: bash
 
     - name: Deploy Cloudformation Stack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
