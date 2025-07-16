@@ -41,24 +41,26 @@ runs:
           fi
         done
 
-    - run: |
+    - name: Bake the CloudFormation Universal Stack template
+      shell: bash
+      run: |
         pwd
         ls -lah
         aws cloudformation package --template-file ${{ inputs.cfn_catalog_path }}/${{ inputs.cfn_template_basename }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file cloudformation_template.yaml
         aws s3 cp cloudformation_template.yaml s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.app_name }}/${{ inputs.cfn_template_basename }}
-      shell: bash
-    
+
     - name: move parameters to s3 and name them accordingly
+      shell: bash
       run: |
-        for file in ${{ inputs.cfn_catalog_path }}/*.json; do
+        for file in ${{ inputs.cfn_catalog_path }}/${{ inputs.app_name}}-*.json; do
           if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
             echo "Processing $file"
             aws s3 cp $file s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.app_name }}/${{ inputs.app_name }}-$( basename $file | sed 's/.*-//')
           fi
         done
-      shell: bash
 
     - name: move stack tags to s3 and name them accordingly
+      shell: bash
       run: |
         for file in ${{ inputs.tags_catalog_path }}/*.json; do
           if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
@@ -66,4 +68,3 @@ runs:
             aws s3 cp $file s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.app_name }}/${{ inputs.app_name }}-stack-tags-$( basename $file | sed 's/.*-//')
           fi
         done
-      shell: bash
