@@ -39,7 +39,9 @@ runs:
         role-to-assume: arn:aws:iam::${{ inputs.storage_account }}:role/Github_Actions_Role
         aws-region: ${{ inputs.aws_region }}
 
-    - run: |
+    - name: copy data
+      id: copy_data
+      run: |
         aws s3 cp s3://cfn-lambdas-${{ inputs.aws_region }}/${{ inputs.repository_name }}/${{ inputs.rel_tag }}/${{ inputs.app_name }}/ . --recursive
       shell: bash
 
@@ -49,6 +51,7 @@ runs:
         TAGS_JSON=$(jq -c . ${{ inputs.app_name}}-stack-tags-${{ inputs.env }}.json)
         echo "tags=$TAGS_JSON" >> $GITHUB_OUTPUT
       shell: bash
+      if: steps.copy_data.outcome == 'success'
 
     - name: Configure AWS credentials CFN deploy
       uses: aws-actions/configure-aws-credentials@v3
