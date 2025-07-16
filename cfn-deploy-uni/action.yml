@@ -43,18 +43,18 @@ runs:
         aws s3 cp s3://cfn-lambdas-${{ inputs.aws_region }}/${{ inputs.repository_name }}/${{ inputs.rel_tag }}/${{ inputs.app_name }}/ . --recursive
       shell: bash
 
-    - name: Configure AWS credentials CFN deploy
-      uses: aws-actions/configure-aws-credentials@v3
-      with:
-        role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/Github_Actions_Role
-        aws-region: ${{ inputs.aws_region }}
-
     - name: parse tags
       id: parse_tags
       run: |
         TAGS_JSON=$(jq -c . ${{ inputs.app_name}}-stack-tags-${{ inputs.env }}.json)
         echo "tags=$TAGS_JSON" >> $GITHUB_OUTPUT
       shell: bash
+
+    - name: Configure AWS credentials CFN deploy
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/Github_Actions_Role
+        aws-region: ${{ inputs.aws_region }}
 
     - name: Deploy Cloudformation Stack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
