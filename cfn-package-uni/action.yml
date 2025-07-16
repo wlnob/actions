@@ -44,8 +44,8 @@ runs:
     - run: |
         pwd
         ls -lah
-        aws cloudformation package --template-file ${{ inputs.cfn_catalog_path }}/${{ inputs.cfn_template_basename }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file ${{ inputs.cfn_template_basename }}
-        aws s3 cp ${{ inputs.cfn_template_basename }} s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.app_name }}/${{ inputs.cfn_template_basename }}
+        aws cloudformation package --template-file ${{ inputs.cfn_catalog_path }}/${{ inputs.cfn_template_basename }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file cloudformation_template.yaml
+        aws s3 cp cloudformation_template.yaml s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.app_name }}/${{ inputs.cfn_template_basename }}
       shell: bash
     
     - name: move parameters to s3 and name them accordingly
