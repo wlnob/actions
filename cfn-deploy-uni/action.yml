@@ -52,7 +52,7 @@ runs:
     - name: parse tags
       id: parse_tags
       run: |
-        TAGS_JSON=$(jq -c . ${{ inputs.app_name}}-tags-${{ inputs.env }}.json)
+        TAGS_JSON=$(jq -c . ${{ inputs.app_name}}-stack-tags-${{ inputs.env }}.json)
         echo "tags=$TAGS_JSON" >> $GITHUB_OUTPUT
 
     - name: Deploy Cloudformation Stack
