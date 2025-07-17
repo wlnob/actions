@@ -1,0 +1,70 @@
+# .GitHub/actions/cloudformation-package-upload/action.yml
+name: 'CloudFormation Package and Upload'
+description: 'Packages a CloudFormation template and uploads it to S3'
+inputs:
+  s3_key_prefix:
+    description: 'S3 Key Prefix'
+    required: true
+  s3_bucket:
+    description: 'S3 Bucket Name'
+    required: true
+  cfn_catalog_path:
+    description: 'Catalog path to CF template'
+    required: true
+  cfn_template_basename:
+    description: 'CF template filename'
+    required: true
+  tags_catalog_path:
+    description: 'Catalog path to tags'
+    required: false
+    default: 'cfn/stack-tags'
+  tag:
+    description: 'Release plugin tag/commit, used as discriminator in S3 bucket'
+    required: true
+  app_name:
+    description: 'app name'
+    required: true
+
+
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Bake the tag into the CloudFormation Universal Stack template
+      shell: bash
+      run: |
+        for file in ${{ inputs.cfn_catalog_path }}/${{ inputs.app_name}}-*.json; do
+         if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
+            echo "Baking release commit ImageTag '${{ inputs.tag }}' into $file"
+            jq --arg commit_id ${{ inputs.tag }} 'map(if .ParameterKey == "ImageTag" then .ParameterValue = $commit_id else . end)' "$file" > cfn/temp.json && mv cfn/temp.json "$file"
+          fi
+        done
+
+    - name: Bake the CloudFormation Universal Stack template
+      shell: bash
+      run: |
+        pwd
+        ls -lah
+        aws cloudformation package --template-file ${{ inputs.cfn_catalog_path }}/${{ inputs.cfn_template_basename }} --s3-bucket ${{ inputs.s3_bucket }} --s3-prefix ${{ inputs.s3_key_prefix }} --output-template-file cloudformation_template.yaml
+        aws s3 cp cloudformation_template.yaml s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.app_name }}/${{ inputs.cfn_template_basename }}
+
+    - name: move parameters to s3 and name them accordingly
+      shell: bash
+      run: |
+        for file in ${{ inputs.cfn_catalog_path }}/${{ inputs.app_name}}-*.json; do
+          if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
+            echo "Processing $file"
+            aws s3 cp $file s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.app_name }}/${{ inputs.app_name }}-$( basename $file | sed 's/.*-//')
+          fi
+        done
+
+    - name: move stack tags to s3 and name them accordingly
+      shell: bash
+      run: |
+        for file in ${{ inputs.tags_catalog_path }}/*.json; do
+          if [[ -f "$file" ]]; then  # Check if it's a file and not an empty glob
+            echo "Processing $file"
+            aws s3 cp $file s3://${{ inputs.s3_bucket }}/${{ inputs.s3_key_prefix }}/${{ inputs.app_name }}/${{ inputs.app_name }}-stack-tags-$( basename $file | sed 's/.*-//')
+          fi
+        done

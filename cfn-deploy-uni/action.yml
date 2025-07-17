@@ -24,8 +24,11 @@ inputs:
     description: 'Capabilities'
     required: false
     default: 'CAPABILITY_NAMED_IAM'
-  name:
+  app_name:
     description: 'Stack name'
+    required: true
+  cfn_template_basename:
+    description: 'CF template filename'
     required: true
 runs:
   using: "composite"
@@ -36,9 +39,19 @@ runs:
         role-to-assume: arn:aws:iam::${{ inputs.storage_account }}:role/Github_Actions_Role
         aws-region: ${{ inputs.aws_region }}
 
-    - run: |
-        aws s3 cp s3://cfn-lambdas-${{ inputs.aws_region }}/${{ inputs.repository_name }}/${{ inputs.rel_tag }}/ . --recursive
+    - name: copy data
+      id: copy_data
+      run: |
+        aws s3 cp s3://cfn-lambdas-${{ inputs.aws_region }}/${{ inputs.repository_name }}/${{ inputs.rel_tag }}/${{ inputs.app_name }}/ . --recursive
       shell: bash
+
+    - name: parse tags
+      id: parse_tags
+      run: |
+        TAGS_JSON=$(jq -c . ${{ inputs.app_name}}-stack-tags-${{ inputs.env }}.json)
+        echo "tags=$TAGS_JSON" >> $GITHUB_OUTPUT
+      shell: bash
+      if: steps.copy_data.outcome == 'success'
 
     - name: Configure AWS credentials CFN deploy
       uses: aws-actions/configure-aws-credentials@v3
@@ -49,10 +62,12 @@ runs:
     - name: Deploy Cloudformation Stack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
       with:
-        name: ${{ inputs.name }}
+        name: ${{ inputs.app_name }}
         capabilities: ${{ inputs.capabilities }}
-        template: cloudformation_template.yaml
+        template: ${{ inputs.cfn_template_basename }}
         no-fail-on-empty-changeset: "1"
         parameter-overrides: |
-          file:///${{ github.workspace }}/${{ inputs.repository_name }}-dynamic-parameters-${{ inputs.env }}.json
+          file:///${{ github.workspace }}/${{ inputs.app_name }}-${{ inputs.env }}.json
+        tags: ${{ steps.parse_tags.outputs.tags }}
         timeout-in-minutes: 20
+      if: steps.parse_tags.outcome =='success'
