@@ -53,6 +53,14 @@ runs:
       shell: bash
       if: steps.copy_data.outcome == 'success'
 
+    - name: parse parameters
+      id: parse_parameters
+      run: |
+        PARAMETERS_JSON=$(jq -c . ${{ inputs.app_name}}-${{ inputs.env }}.json)
+        echo "parameters=$PARAMETERS_JSON" >> $GITHUB_OUTPUT
+      shell: bash
+      if: steps.copy_data.outcome == 'success'
+
     - name: Configure AWS credentials CFN deploy
       uses: aws-actions/configure-aws-credentials@v3
       with:
@@ -66,8 +74,7 @@ runs:
         capabilities: ${{ inputs.capabilities }}
         template: ${{ inputs.cfn_template_basename }}
         no-fail-on-empty-changeset: "1"
-        parameter-overrides: |
-          file:///${{ github.workspace }}/${{ inputs.app_name }}-${{ inputs.env }}.json
+        parameter-overrides: ${{ steps.parse_parameters.outputs.parameters }}
         tags: ${{ steps.parse_tags.outputs.tags }}
         timeout-in-minutes: 20
-      if: steps.parse_tags.outcome =='success'
+      if: steps.parse_tags.outcome =='success' && steps.parse_parameters.outcome =='success'
