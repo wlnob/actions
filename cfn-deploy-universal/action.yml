@@ -56,7 +56,7 @@ runs:
     - name: parse parameters
       id: parse_parameters
       run: |
-        PARAMETERS_JSON=$(jq -c . ${{ inputs.app_name}}-${{ inputs.env }}.json)
+        PARAMETERS_JSON=$(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' "${{ inputs.app_name }}-${{ inputs.env }}.json" | tr '\n' ' ')
         echo "parameters=$PARAMETERS_JSON" >> $GITHUB_OUTPUT
       shell: bash
       if: steps.copy_data.outcome == 'success'
