@@ -62,6 +62,7 @@ runs:
 
     - name: Build with Maven (tests + coverage)
       run: mvn -B clean verify
+      shell: bash
 
     - name: SonarCloud Scan
       run: |
@@ -71,7 +72,9 @@ runs:
           -Dsonar.host.url=${{ inputs.sonar_url }} \
           -Dsonar.token=${{ inputs.sonar_token }} \
           -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.jacoco_path }}
+      shell: bash
 
     - name: Human readable report checkout
       run: cat ${{ inputs.jacoco_report_path }}
+      shell: bash
       continue-on-error: true
