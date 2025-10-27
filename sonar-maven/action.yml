@@ -1,0 +1,77 @@
+name: 'SonarCloud analisys Maven'
+description: 'Run SonarCloud analisys using Maven way'
+inputs:
+  java_distro:
+    description: 'distribution of java'
+    requried: false
+    default: 'corretto'
+  java_version:
+    description: 'Override java version. ex: 21'
+    required: false
+    default: '21'
+  jacoco_report_path:
+    description: 'path to human readable report'
+    required: false
+    default: 'target/site/jacoco/index.html'
+  jacoco_path:
+    description: 'path to human readable report'
+    required: false
+    default: 'target/site/jacoco/jacoco.xml'
+  project_key:
+    description: 'Project key from SonarCloud'
+    required: true
+  sonar_organization:
+    description: 'Organization name in GitHub for sonar access'
+    required: false
+    default: 'wlnob'
+  sonar_url:
+    description: 'URL to sonar host'
+    required: false
+    default: 'https://sonarcloud.io'
+  sonar_token:
+    description: 'Sonar access token'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: "${{ inputs.java_distro }}"
+        java-version: "${{ inputs.java_version }}"
+        cache: 'maven'
+        server-id: github    
+
+    # Cache SonarCloud packages
+    - name: Cache SonarQube packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar-${{ github.event.repository.name }}-${{ github.ref_name }}
+        restore-keys: ${{ runner.os }}-sonar-${{ github.event.repository.name }}-${{ github.ref_name }}
+
+    # Cache Maven dependencies
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ github.event.repository.name }}-${{ github.ref_name }}
+        restore-keys: |
+          ${{ runner.os }}-m2-${{ github.event.repository.name }}-${{ github.ref_name }}
+
+    - name: Build with Maven (tests + coverage)
+      run: mvn -B clean verify
+
+    - name: SonarCloud Scan
+      run: |
+        mvn -B sonar:sonar \
+          -Dsonar.projectKey=${{ inputs.project_key }} \
+          -Dsonar.organization=${{ inputs.sonar_organization}} \
+          -Dsonar.host.url=${{ inputs.sonar_url }} \
+          -Dsonar.token=${{ inputs.sonar_token }} \
+          -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.jacoco_path }}
+
+    - name: Human readable report checkout
+      run: cat ${{ inputs.jacoco_report_path }}
+      continue-on-error: true
