@@ -1,0 +1,72 @@
+name: 'SonarCloud analysis Maven'
+description: 'Run SonarCloud analysis using Maven way'
+inputs:
+  java_distribution:
+    description: 'distribution of java'
+    required: false
+    default: 'corretto'
+  java_version:
+    description: 'Override java version. ex: 21'
+    required: false
+    default: '21'
+  jacoco_path:
+    description: 'path to jacoco report file'
+    required: false
+    default: 'target/site/jacoco/jacoco.xml'
+  project_key:
+    description: 'Project key from SonarCloud'
+    required: true
+  sonar_organization:
+    description: 'Organization name in GitHub for sonar access'
+    required: false
+    default: 'wlnob'
+  sonar_url:
+    description: 'URL to sonar host'
+    required: false
+    default: 'https://sonarcloud.io'
+  sonar_token:
+    description: 'Sonar access token'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: "${{ inputs.java_distribution }}"
+        java-version: "${{ inputs.java_version }}"
+        cache: 'maven'
+        server-id: github
+
+    # Cache SonarCloud packages
+    - name: Cache SonarCloud packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar-${{ github.event.repository.name }}-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: ${{ runner.os }}-sonar-${{ github.event.repository.name }}-${{ github.ref_name }}
+
+    # Cache Maven dependencies
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ github.event.repository.name }}-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-m2-${{ github.event.repository.name }}-${{ github.ref_name }}
+
+    - name: Build with Maven (tests + coverage)
+      run: mvn -B clean verify
+      shell: bash
+
+    - name: SonarCloud Scan
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar_token }}
+      run: |
+        mvn -B sonar:sonar \
+          -Dsonar.projectKey=${{ inputs.project_key }} \
+          -Dsonar.organization=${{ inputs.sonar_organization}} \
+          -Dsonar.host.url=${{ inputs.sonar_url }} \
+          -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.jacoco_path }}
+      shell: bash
