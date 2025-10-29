@@ -1,7 +1,7 @@
 name: 'SonarCloud analysis Maven'
 description: 'Run SonarCloud analysis using Maven way'
 inputs:
-  java_distro:
+  java_distribution:
     description: 'distribution of java'
     required: false
     default: 'corretto'
@@ -34,7 +34,7 @@ runs:
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        distribution: "${{ inputs.java_distro }}"
+        distribution: "${{ inputs.java_distribution }}"
         java-version: "${{ inputs.java_version }}"
         cache: 'maven'
         server-id: github
