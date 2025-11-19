@@ -14,11 +14,11 @@ inputs:
     required: false
     default: '11'
   maven-args:
-    description: 'override maven args. ex: -Darguments="-Dmaven.javadoc.skip=true"'
+    description: 'add maven args. ex: -Darguments="-Dmaven.javadoc.skip=true"'
     required: false
     default: ''
   maven-perform-release-args:
-    description: 'override maven args. ex: -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
+    description: 'add maven args. ex: -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
     required: false
     default: ''
   maven-profile: 
@@ -81,7 +81,11 @@ runs:
           GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         echo "Building the Service jar"
-        mvn -B -Darguments='-Dmaven.javadoc.skip=true' clean initialize release:prepare "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
+      
+        EXTRA_ARGS="${{ inputs.maven-args }}"
+        PROFILE="${{ inputs.maven-profile }}"
+
+        mvn -B -Darguments='-Dmaven.javadoc.skip=true' ${EXTRA_ARGS:+$EXTRA_ARGS} ${PROFILE:+$PROFILE} clean initialize release:prepare
       shell: bash
       # Get Properties for Docker artifact process
     - name: Read Properties
@@ -107,7 +111,11 @@ runs:
       shell: bash
       run: |
         echo "performing release for scm=${{steps.properties.outputs.tag}}"
-        mvn -B -Darguments='-Dmaven.test.skip=true -Dmaven.javadoc.skip=true' release:perform "${{ inputs.maven-perform-release-args }}" "${{ inputs.maven-profile }}"
+
+        EXTRA_ARGS="${{ inputs.maven-perform-release-args }}"
+        PROFILE="${{ inputs.maven-profile }}"
+
+        mvn -B -Darguments='-Dmaven.test.skip=true -Dmaven.javadoc.skip=true' ${EXTRA_ARGS:+$EXTRA_ARGS} ${PROFILE:+$PROFILE} release:perform
 
 
     - name: Get Maven Release plugin
