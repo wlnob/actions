@@ -117,7 +117,6 @@ runs:
 
         mvn -B -Darguments='-Dmaven.test.skip=true -Dmaven.javadoc.skip=true' ${EXTRA_ARGS:+$EXTRA_ARGS} ${PROFILE:+$PROFILE} release:perform
 
-
     - name: Get Maven Release plugin
       id: getReleaseCommit
       run: |
