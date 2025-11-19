@@ -18,7 +18,7 @@ inputs:
     required: false
     default: ''
   maven-perform-release-args:
-    description: 'override maven args. ex: -Darguments="-Dmaven.javadoc.skip=true"'
+    description: 'override maven args. ex: -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
     required: false
     default: ''
   maven-profile: 
@@ -107,7 +107,7 @@ runs:
       shell: bash
       run: |
         echo "performing release for scm=${{steps.properties.outputs.tag}}"
-        mvn -B -Darguments='-Dmaven.javadoc.skip=true' release:perform "${{ inputs.maven-perform-release-args }}" "${{ inputs.maven-profile }}"
+        mvn -B -Darguments='-Dmaven.test.skip=true -Dmaven.javadoc.skip=true' release:perform "${{ inputs.maven-perform-release-args }}" "${{ inputs.maven-profile }}"
 
 
     - name: Get Maven Release plugin
