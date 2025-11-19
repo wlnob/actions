@@ -17,6 +17,10 @@ inputs:
     description: 'override maven args. ex: -Darguments="-Dmaven.javadoc.skip=true"'
     required: false
     default: none
+  maven-perform-release-args:
+    description: 'override maven args. ex: -Darguments="-Dmaven.javadoc.skip=true"'
+    required: false
+    default: none    
   maven-profile: 
     description: 'set maven profile, if needed. ex: -Pgithub-actions'
     required: false
@@ -103,7 +107,7 @@ runs:
       shell: bash
       run: |
         echo "performing release for scm=${{steps.properties.outputs.tag}}"
-        mvn -B -Darguments='-Dmaven.javadoc.skip=true' release:perform "${{ inputs.maven-args }}" "${{ inputs.maven-profile }}"
+        mvn -B -Darguments='-Dmaven.javadoc.skip=true' release:perform "${{ inputs.maven-args }}" "${{ inputs.maven-perform-release-args }}" "${{ inputs.maven-profile }}"
 
 
     - name: Get Maven Release plugin
