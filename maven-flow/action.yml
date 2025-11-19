@@ -14,11 +14,11 @@ inputs:
     required: false
     default: '11'
   maven-args:
-    description: 'add maven args. ex: -Darguments="-Dmaven.javadoc.skip=true"'
+    description: 'Override maven args. ex: -Darguments="-Dmaven.javadoc.skip=true"'
     required: false
     default: ''
   maven-perform-release-args:
-    description: 'add maven args. ex: -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
+    description: 'Override maven args. ex: -Darguments="-Dmaven.test.skip=true -Dmaven.javadoc.skip=true"'
     required: false
     default: ''
   maven-profile: 
