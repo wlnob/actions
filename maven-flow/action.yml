@@ -46,9 +46,12 @@ runs:
         token: ${{ inputs.github-token }}
 
     - name: Echo commit message
+      env:
+        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        COMMIT_ID: ${{ github.event.head_commit.id }}
       run: |
-        echo "Commit message: ${{ github.event.head_commit.message }}"
-        echo "Commit id: ${{ github.event.head_commit.id }}"
+        echo "Commit message: $COMMIT_MESSAGE"
+        echo "Commit id: $COMMIT_ID"
       shell: bash
 
     - name: Set up JDK
